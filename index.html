@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ANOMIA</title>
+    <style>
+        body {
+            background-color: #0015ff;
+            color: #ffffff; /* Changed to pure white */
+            margin: 0;
+            font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 5px;
+        }
+
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .poem-box {
+            border: 2px solid #ffffff; /* White border */
+            padding: 15px;
+            margin-bottom: 20px;
+            background: #0015ff;
+        }
+
+        form {
+            border: 2px solid #ffffff;
+            padding: 20px;
+            margin-bottom: 40px;
+        }
+
+        input, textarea {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #0015ff;
+            border: 1px solid #ffffff;
+            color: #ffffff;
+        }
+
+        button {
+            background: #ffffff;
+            color: #0015ff;
+            padding: 10px 20px;
+            border: 2px solid #ffffff;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            font-weight: 800;
+            letter-spacing: 8px;
+        }
+
+        ::placeholder {
+            color: #ffffff;
+            opacity: 0.7;
+        }
+
+        .timestamp {
+            font-size: 0.8em;
+            opacity: 0.8;
+            margin-top: -10px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ANOMIA</h1>
+        <form id="poemForm">
+            <input type="text" id="title" placeholder="Title" required>
+            <textarea id="poem" placeholder="Write your text here..." rows="6" required></textarea>
+            <button type="submit">Share Poem</button>
+        </form>
+        <div id="poemList"></div>
+    </div>
+
+    <!-- Add these in <head> or before closing </body> -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
+<script>
+  // Initialize Firebase with your config
+  const firebaseConfig = {
+    apiKey: "AIzaSyBoJd6A2mHXhPjIjZFexSmJ9k7ygLIvR5k",
+  authDomain: "anomia-bpm.firebaseapp.com",
+  projectId: "anomia-bpm",
+  storageBucket: "anomia-bpm.firebasestorage.app",
+  messagingSenderId: "1031341889553",
+  appId: "1:1031341889553:web:1676115591c1fb1867b9b0",
+  measurementId: "G-R02SDHFRTC"
+  };
+  
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const poemForm = document.querySelector('#poemForm');
+      const poemList = document.querySelector('#poemList');
+      const titleInput = document.querySelector('#title');
+      const poemInput = document.querySelector('#poem');
+  
+      // Load poems from Firestore
+      async function loadPoems() {
+        poemList.innerHTML = '';
+        const snapshot = await db.collection('poems')
+                                .orderBy('time', 'desc')
+                                .get();
+        
+        snapshot.forEach(doc => {
+          const poem = doc.data();
+          const poemElement = document.createElement('div');
+          poemElement.className = 'poem-box';
+          poemElement.innerHTML = `
+            <h3>${poem.title}</h3>
+            <div class="timestamp">
+              Posted: ${new Date(poem.time?.toDate()).toLocaleDateString()} 
+              ${new Date(poem.time?.toDate()).toLocaleTimeString()}
+            </div>
+            <pre class="poem-content">${poem.text}</pre>
+          `;
+          poemList.appendChild(poemElement);
+        });
+      }
+  
+      // Submit handler
+      poemForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!titleInput.value.trim() || !poemInput.value.trim()) return;
+  
+        try {
+          await db.collection('poems').add({
+            title: titleInput.value.trim(),
+            text: poemInput.value.trim(),
+            time: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          
+          poemForm.reset();
+          await loadPoems(); // Refresh the list
+        } catch (error) {
+          console.error('Error submitting poem:', error);
+        }
+      });
+  
+      // Initial load
+      loadPoems();
+    });
+  </script>
+
+    
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "02-dspoem",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "firebase": "^11.4.0",
+    "git": "^0.1.5",
+    "vite": "^6.2.2"
+  }
+}
