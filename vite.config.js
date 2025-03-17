@@ -1,5 +1,6 @@
 export default {
+    base: '/anonbpm/', // Match your GitHub repo name
     build: {
-      outDir: 'dist'
+      outDir: 'docs'
     }
   }
